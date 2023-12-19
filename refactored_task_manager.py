@@ -36,6 +36,235 @@ for t_str in task_data:
 
     task_list.append(curr_t)
 
+#=====functions=====#
+
+#registering a new user, asking for username, password, then confirmation of password
+def reg_user(new_username, new_password, confirm_password):
+    # Check if the new password and confirmed password are the same.
+    # - Check if the new password and confirmed password are the same.
+        if new_password == confirm_password:
+            # - If they are the same, add them to the user.txt file,
+            print("New user added")
+            username_password[new_username] = new_password
+            
+            user_data = []
+            
+            with open("user.txt", "r") as out_file_read:
+                # check if username exists
+                for user in out_file_read:
+                    # - If username exists, prompt to choose alternative
+                    if new_username in user:
+                        print("This username has already been registered. Please choose a different username.")
+                # Otherwise add username and present a relevant message.
+                else:
+                    with open("user.txt", "w") as out_file:
+                        for k in username_password:
+                            user_data.append(f"{k};{username_password[k]}")
+                        out_file.write("\n".join(user_data))
+
+        # Otherwise you present a relevant message.
+        else:
+            return("Passwords do no match")
+
+# adds tasks
+def add_task(task_username, task_title, task_description):
+#'''Allow a user to add a new task to task.txt file
+            #Prompt a user for the following: 
+             #- A username of the person whom the task is assigned to,
+             #- A title of a task,
+             #- A description of the task and 
+             #- the due date of the task.'''
+        if task_username not in username_password.keys():
+            print("User does not exist. Please enter a valid username")
+            
+        
+        while True:
+            try:
+                task_due_date = input("Due date of task (YYYY-MM-DD): ")
+                due_date_time = datetime.datetime.strptime(task_due_date, DATETIME_STRING_FORMAT)
+                break
+
+            except ValueError:
+                print("Invalid datetime format. Please use the format specified")
+
+        # Then get the current date.
+        curr_date = date.today() ;''' Add the data to the file task.txt and Include 'No' to indicate if the task is complete.'''
+        new_task = {
+            "username": task_username,
+            "title": task_title,
+            "description": task_description,
+            "due_date": due_date_time,
+            "assigned_date": curr_date,
+            "completed": False
+        }
+
+        task_list.append(new_task)
+        with open("tasks.txt", "w") as task_file:
+            task_list_to_write = []
+            for t in task_list:
+                str_attrs = [
+                    t['username'],
+                    t['title'],
+                    t['description'],
+                    t['due_date'].strftime(DATETIME_STRING_FORMAT),
+                    t['assigned_date'].strftime(DATETIME_STRING_FORMAT),
+                    "Yes" if t['completed'] else "No"
+                ]
+                task_list_to_write.append(";".join(str_attrs))
+            task_file.write("\n".join(task_list_to_write))
+        print("Task successfully added.")
+
+def view_all(array): 
+# Reads the task from task.txt file and prints to the console in the 
+# format of Output 2 presented in the task pdf (i.e. includes spacing
+# and labelling) 
+ 
+    for t in array:
+        disp_str = f"Task: \t\t {array.index(t) + 1}) {t['title']}\n"
+        disp_str += f"Assigned to: \t {t['username']}\n"
+        disp_str += f"Date Assigned: \t {t['assigned_date'].strftime(DATETIME_STRING_FORMAT)}\n"
+        disp_str += f"Due Date: \t {t['due_date'].strftime(DATETIME_STRING_FORMAT)}\n"
+        disp_str += f"Task Description: {t['description']}\n"
+        disp_str += f"Task status: \t {'COMPLETE' if t['completed'] == True else 'INCOMPLETE'}\n"
+        print(disp_str)
+        
+def view_mine(array):
+    '''Reads the task from task.txt file and prints to the console in the 
+    format of Output 2 presented in the task pdf (i.e. includes spacing
+     and labelling)'''
+
+    task_status = ""
+
+    for t in array:
+            if t['username'] == curr_user:
+                disp_str = f"Task: \t\t {array.index(t) + 1}) {t['title']}\n"
+                disp_str += f"Assigned to: \t {t['username']}\n"
+                disp_str += f"Date Assigned: \t {t['assigned_date'].strftime(DATETIME_STRING_FORMAT)}\n"
+                disp_str += f"Due Date: \t {t['due_date'].strftime(DATETIME_STRING_FORMAT)}\n" 
+                disp_str += f"Task Description: {t['description']}\n"
+                disp_str += f"Task status: \t {'COMPLETE' if t['completed'] == True else 'INCOMPLETE'}\n"
+                print(disp_str)                
+    
+    task_num = input("Type a task number or type -1 to return to the main menu: ")
+    
+    if task_num.isdigit() == False:
+        print("You have made a wrong choice. Please try again.")
+        task_num = input("Type a task number or type -1 to return to the main menu: ")
+    # Action if -1 chosen 
+    elif int(task_num) == int(-1):
+        return menu
+    # Action if valid task number chosen
+    elif array[int(task_num) -1]:
+        curr_task_index = task_num -1
+        task_status = input("Type 'complete' or 'edit': ")
+    # Action if invalid task number chosen
+    else:
+        print("This task nunmber does not exist")
+        task_num
+
+
+    # actions if 'complete' chosen
+    if task_status == "complete":
+        array[curr_task_index]['completed'] = "Yes"
+        print(f"\n \n*****Task status updated*****")
+        disp_str = f"\nTask: \t\t {array[curr_task_index]['title']}\n"
+        disp_str += f"Assigned to: \t {array[curr_task_index]['username']}\n"
+        disp_str += f"Date Assigned: \t {array[curr_task_index]['assigned_date'].strftime(DATETIME_STRING_FORMAT)}\n"
+        disp_str += f"Due Date: \t {array[curr_task_index]['due_date'].strftime(DATETIME_STRING_FORMAT)}\n"
+        disp_str += f"Task Description: {array[curr_task_index]['description']}\n"
+        disp_str += f"Task status: \t {'COMPLETE' if array[curr_task_index]['completed'] == 'Yes' else 'INCOMPLETE'}\n"
+        print(disp_str)
+        
+        # Write result to task.txt file:
+        with open("tasks.txt", "w") as task_file:
+                task_list_to_write = []
+                for t in task_list:
+                    str_attrs = [
+                        t['username'],
+                        t['title'],
+                        t['description'],
+                        t['due_date'].strftime(DATETIME_STRING_FORMAT),
+                        t['assigned_date'].strftime(DATETIME_STRING_FORMAT),
+                        "Yes" if t['completed'] else "No"
+                    ]
+                    task_list_to_write.append(";".join(str_attrs))
+                task_file.write("\n".join(task_list_to_write))
+
+    # Action if 'edit' chosen
+    elif task_status == "edit" and array[curr_task_index]['completed'] != 'Yes' :
+        edit_choice = input("Type 'username' or 'due date' to edit username or due date: ")
+        
+        # Action if 'username' selected
+        if edit_choice == "username":
+            new_username = input("Type a new username: ")
+            array[curr_task_index]['username'] = new_username 
+            print(f"\n \n*****Task status updated*****")
+            disp_str = f"\nTask: \t\t {array[curr_task_index]['title']}\n"
+            disp_str += f"Assigned to: \t {array[curr_task_index]['username']}\n"
+            disp_str += f"Date Assigned: \t {array[curr_task_index]['assigned_date'].strftime(DATETIME_STRING_FORMAT)}\n"
+            disp_str += f"Due Date: \t {array[curr_task_index]['due_date'].strftime(DATETIME_STRING_FORMAT)}\n"
+            disp_str += f"Task Description: {array[curr_task_index]['description']}\n"
+            disp_str += f"Task status: \t {'COMPLETE' if array[curr_task_index]['completed'] == 'Yes' else 'INCOMPLETE'}\n"
+            print(disp_str)
+            
+            # Write changes to text file
+            with open("tasks.txt", "w") as task_file:
+                task_list_to_write = []
+                for t in task_list:
+                    str_attrs = [
+                        t['username'],
+                        t['title'],
+                        t['description'],
+                        t['due_date'].strftime(DATETIME_STRING_FORMAT),
+                        t['assigned_date'].strftime(DATETIME_STRING_FORMAT),
+                        "Yes" if t['completed'] else "No"
+                    ]
+                    task_list_to_write.append(";".join(str_attrs))
+                task_file.write("\n".join(task_list_to_write))
+
+        # Action if 'due date' chosen
+        elif edit_choice == "due date":
+            try:
+                new_due_date = input("Type a new due date (YYYY-MM-DD): ")
+                new_due_date = datetime.datetime.strptime(new_due_date, DATETIME_STRING_FORMAT)
+            except ValueError:
+                print("Invalid datetime format. Please use the format specified.")
+
+            
+            array[curr_task_index]['due_date'] = new_due_date 
+            print(f"\n \n*****Task status updated*****")
+            disp_str = f"\nTask: \t\t {array[curr_task_index]['title']}\n"
+            disp_str += f"Assigned to: \t {array[curr_task_index]['username']}\n"
+            disp_str += f"Date Assigned: \t {array[curr_task_index]['assigned_date'].strftime(DATETIME_STRING_FORMAT)}\n"
+            disp_str += f"Due Date: \t {array[curr_task_index]['due_date']}\n" #########take out time #########fix errors for nums chosen earlier in menu
+            disp_str += f"Task Description: {array[curr_task_index]['description']}\n"
+            disp_str += f"Task status: \t {'COMPLETE' if array[curr_task_index]['completed'] == 'Yes' else 'INCOMPLETE'}\n"
+            print(disp_str)
+            # Write changes to text file
+            
+            with open("tasks.txt", "w") as task_file:
+                task_list_to_write = []
+                for t in task_list:
+                    str_attrs = [
+                        t['username'],
+                        t['title'],
+                        t['description'],
+                        t['due_date'].strftime(DATETIME_STRING_FORMAT),
+                        t['assigned_date'].strftime(DATETIME_STRING_FORMAT),
+                        "Yes" if t['completed'] else "No"
+                    ]
+                    task_list_to_write.append(";".join(str_attrs))
+                task_file.write("\n".join(task_list_to_write))
+            
+
+            # Condition if neither value typed
+        else:
+             print("Please select a valid option.")
+             task_num 
+    '''function that displays report of total number of tasks,
+    completed tasks, uncompleted tasks, tasks overdue, and percentages
+    of incomplete and overview tasks, respectively
+    '''
 
 #====Login Section====
 '''This code reads usernames and password from the user.txt file to 
@@ -87,115 +316,16 @@ e - Exit
 : ''').lower()
 
     if menu == 'r':
-        '''Add a new user to the user.txt file'''
-        # - Request input of a new username
-        new_username = input("New Username: ")
-
-        # - Request input of a new password
-        new_password = input("New Password: ")
-
-        # - Request input of password confirmation.
-        confirm_password = input("Confirm Password: ")
-
-        # - Check if the new password and confirmed password are the same.
-        if new_password == confirm_password:
-            # - If they are the same, add them to the user.txt file,
-            print("New user added")
-            username_password[new_username] = new_password
-            
-            with open("user.txt", "w") as out_file:
-                user_data = []
-                for k in username_password:
-                    user_data.append(f"{k};{username_password[k]}")
-                out_file.write("\n".join(user_data))
-
-        # - Otherwise you present a relevant message.
-        else:
-            print("Passwords do no match")
+       reg_user(input("New Username: "), input("New Password: "), input("Confirm Password: "))
 
     elif menu == 'a':
-        '''Allow a user to add a new task to task.txt file
-            Prompt a user for the following: 
-             - A username of the person whom the task is assigned to,
-             - A title of a task,
-             - A description of the task and 
-             - the due date of the task.'''
-        task_username = input("Name of person assigned to task: ")
-        if task_username not in username_password.keys():
-            print("User does not exist. Please enter a valid username")
-            continue
-        task_title = input("Title of Task: ")
-        task_description = input("Description of Task: ")
-        while True:
-            try:
-                task_due_date = input("Due date of task (YYYY-MM-DD): ")
-                due_date_time = datetime.strptime(task_due_date, DATETIME_STRING_FORMAT)
-                break
-
-            except ValueError:
-                print("Invalid datetime format. Please use the format specified")
-
-
-        # Then get the current date.
-        curr_date = date.today()
-        ''' Add the data to the file task.txt and
-            Include 'No' to indicate if the task is complete.'''
-        new_task = {
-            "username": task_username,
-            "title": task_title,
-            "description": task_description,
-            "due_date": due_date_time,
-            "assigned_date": curr_date,
-            "completed": False
-        }
-
-        task_list.append(new_task)
-        with open("tasks.txt", "w") as task_file:
-            task_list_to_write = []
-            for t in task_list:
-                str_attrs = [
-                    t['username'],
-                    t['title'],
-                    t['description'],
-                    t['due_date'].strftime(DATETIME_STRING_FORMAT),
-                    t['assigned_date'].strftime(DATETIME_STRING_FORMAT),
-                    "Yes" if t['completed'] else "No"
-                ]
-                task_list_to_write.append(";".join(str_attrs))
-            task_file.write("\n".join(task_list_to_write))
-        print("Task successfully added.")
-
-
-    elif menu == 'va':
-        '''Reads the task from task.txt file and prints to the console in the 
-           format of Output 2 presented in the task pdf (i.e. includes spacing
-           and labelling) 
-        '''
-
-        for t in task_list:
-            disp_str = f"Task: \t\t {t['title']}\n"
-            disp_str += f"Assigned to: \t {t['username']}\n"
-            disp_str += f"Date Assigned: \t {t['assigned_date'].strftime(DATETIME_STRING_FORMAT)}\n"
-            disp_str += f"Due Date: \t {t['due_date'].strftime(DATETIME_STRING_FORMAT)}\n"
-            disp_str += f"Task Description: \n {t['description']}\n"
-            print(disp_str)
-            
-
-
-    elif menu == 'vm':
-        '''Reads the task from task.txt file and prints to the console in the 
-           format of Output 2 presented in the task pdf (i.e. includes spacing
-           and labelling)
-        '''
-        for t in task_list:
-            if t['username'] == curr_user:
-                disp_str = f"Task: \t\t {t['title']}\n"
-                disp_str += f"Assigned to: \t {t['username']}\n"
-                disp_str += f"Date Assigned: \t {t['assigned_date'].strftime(DATETIME_STRING_FORMAT)}\n"
-                disp_str += f"Due Date: \t {t['due_date'].strftime(DATETIME_STRING_FORMAT)}\n"
-                disp_str += f"Task Description: \n {t['description']}\n"
-                print(disp_str)
+        add_task(input("Name of person assigned to task: "), input("Title of Task: "), input("Description of Task: "))
                 
+    elif menu == 'va':
+        view_all(task_list)
+                    
+    elif menu == 'vm':
+        view_mine(task_list)      
     
     elif menu == 'ds' and curr_user == 'admin': 
         '''If the user is an admin they can display statistics about number of users
