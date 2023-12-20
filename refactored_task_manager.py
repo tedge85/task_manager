@@ -6,10 +6,15 @@
 # program will look in your root directory for the text files.
 
 #=====importing libraries===========
-import os
+from calendar import c
+import os 
 from datetime import datetime, date
-
 DATETIME_STRING_FORMAT = "%Y-%m-%d"
+from dateutil.parser import parse
+import datetime
+
+# set variable for current date
+current_DT = datetime.datetime.now()
 
 # Create tasks.txt if it doesn't exist
 if not os.path.exists("tasks.txt"):
@@ -20,7 +25,7 @@ with open("tasks.txt", 'r') as task_file:
     task_data = task_file.read().split("\n")
     task_data = [t for t in task_data if t != ""]
 
-
+# Create task list (list of dictionaries to store tasks for each user)
 task_list = []
 for t_str in task_data:
     curr_t = {}
@@ -30,8 +35,8 @@ for t_str in task_data:
     curr_t['username'] = task_components[0]
     curr_t['title'] = task_components[1]
     curr_t['description'] = task_components[2]
-    curr_t['due_date'] = datetime.strptime(task_components[3], DATETIME_STRING_FORMAT)
-    curr_t['assigned_date'] = datetime.strptime(task_components[4], DATETIME_STRING_FORMAT)
+    curr_t['due_date'] = datetime.datetime.strptime(task_components[3], DATETIME_STRING_FORMAT)
+    curr_t['assigned_date'] = datetime.datetime.strptime(task_components[4], DATETIME_STRING_FORMAT)
     curr_t['completed'] = True if task_components[5] == "Yes" else False
 
     task_list.append(curr_t)
@@ -266,6 +271,79 @@ def view_mine(array):
     of incomplete and overview tasks, respectively
     '''
 
+def generate_report(task_data):
+    # Task overview
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    for t in task_data:
+        if t["completed"] == True: 
+            b += 1
+        elif parse(str(t['due_date'])) < current_DT:
+            d += 1
+            c += 1
+        else:
+            c += 1
+            e += 1
+        a += 1
+    
+    task_stats = [   
+        'total', a,
+        'completed tasks', b,
+        'uncompleted tasks', c,
+        'uncompleted and overdue tasks', d,
+        'percentage of tasks that are incomplete', f'{round(c / a * 100)}%',
+        'percentage of tasks that are overdue', f'{round(d / a * 100)}%'
+    ]
+
+    # Convert task_stats dictionary to string
+    #task_stats_str = '\n'.join(task_stats)
+
+    # User overview
+    usernames = [d["username"] for d in task_data]
+    unique_usernames = []
+    for name in usernames:
+        if name not in unique_usernames:
+            unique_usernames.append(name)
+
+    users_registered = len(unique_usernames)
+    task_total = a
+
+    user_tasks = [t["title"] for t in task_data if t["username"] == curr_user]
+    user_tasks_total = len(user_tasks)
+    user_task_percentage = round(user_tasks_total / a * 100)
+    user_completed_tasks_percentage = round(len([d for d in task_data if d["completed"] == True and d["username"] == curr_user]) / user_tasks_total * 100)
+    user_uncompleted_tasks_percentage = round(len([d for d in task_data if d["completed"] == False and d["username"] == curr_user]) / user_tasks_total * 100)
+    user_incompleted_overdue_tasks_percentage = round(len([d for d in task_data if d["completed"] == False and parse(str(d['due_date'])) < current_DT and d["username"] == curr_user]) / user_tasks_total * 100)
+    
+    user_stats = [
+        "total number of users registered", users_registered,
+        "total number of tasks assigned", task_total,
+        "user", curr_user,
+        "total number of tasks assigned to user", user_tasks_total,
+        "percentage of total tasks assigned to user", f"{user_task_percentage}%",
+        "percentage of user's tasks that have been completed", f"{user_completed_tasks_percentage}%",
+        "percentage of user's tasks that have not been completed", f"{user_uncompleted_tasks_percentage}%",
+        "percentage of user's tasks that have not been completed and are overdue", f"{user_incompleted_overdue_tasks_percentage}%"
+    ]
+    # Convert user_stats dictionary to string
+    user_stats_str = ";".join(str(s) for s in user_stats)
+    
+    task_stats_str = ";".join(str(s) for s in task_stats)
+
+    # Output data to user: *********need to change***************
+    print(f"\n******TASK OVERVIEW AND USER OVERVIEW REPORTS GENERATED******\n")
+    
+    # Write results to task_overview.txt file:
+    with open("task_overview.txt", "w+") as t_o_file:
+        t_o_file.write(task_stats_str)
+
+    # Write results to user_overview.txt file:
+    with open("user_overview.txt", "w+") as u_o_file:
+        u_o_file.write(user_stats_str)
+
 #====Login Section====
 '''This code reads usernames and password from the user.txt file to 
     allow a user to login.
@@ -311,6 +389,7 @@ r - Registering a user
 a - Adding a task
 va - View all tasks
 vm - View my task
+gr - Generate reports
 ds - Display statistics
 e - Exit
 : ''').lower()
@@ -327,6 +406,9 @@ e - Exit
     elif menu == 'vm':
         view_mine(task_list)      
     
+    elif menu == "gr":
+        generate_report(task_list)
+
     elif menu == 'ds' and curr_user == 'admin': 
         '''If the user is an admin they can display statistics about number of users
             and tasks.'''
