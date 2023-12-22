@@ -43,7 +43,7 @@ for t_str in task_data:
 
 #=====functions=====#
 
-#registering a new user, asking for username, password, then confirmation of password
+# Function registering a new user, asking for username, password, then confirmation of password
 def reg_user(new_username, new_password, confirm_password):
     # Check if the new password and confirmed password are the same.
     # - Check if the new password and confirmed password are the same.
@@ -71,7 +71,7 @@ def reg_user(new_username, new_password, confirm_password):
         else:
             return("Passwords do no match")
 
-# adds tasks
+# Function that adds tasks
 def add_task(task_username, task_title, task_description):
 #'''Allow a user to add a new task to task.txt file
             #Prompt a user for the following: 
@@ -119,6 +119,7 @@ def add_task(task_username, task_title, task_description):
             task_file.write("\n".join(task_list_to_write))
         print("Task successfully added.")
 
+# Function to display tasks assigned to all users
 def view_all(array): 
 # Reads the task from task.txt file and prints to the console in the 
 # format of Output 2 presented in the task pdf (i.e. includes spacing
@@ -132,7 +133,8 @@ def view_all(array):
         disp_str += f"Task Description: {t['description']}\n"
         disp_str += f"Task status: \t {'COMPLETE' if t['completed'] == True else 'INCOMPLETE'}\n"
         print(disp_str)
-        
+
+# Function to display user's assigned tasks
 def view_mine(array):
     '''Reads the task from task.txt file and prints to the console in the 
     format of Output 2 presented in the task pdf (i.e. includes spacing
@@ -270,7 +272,7 @@ def view_mine(array):
     completed tasks, uncompleted tasks, tasks overdue, and percentages
     of incomplete and overview tasks, respectively
     '''
-
+# function to generate text files for user and task information: task_overview.txt & user_overview.txt
 def generate_report(task_data):
     # Task overview
     a = 0
@@ -344,6 +346,40 @@ def generate_report(task_data):
     with open("user_overview.txt", "w+") as u_o_file:
         u_o_file.write(user_stats_str)
 
+# Function that reads task_overview.txt and user_overview.txt and displays contents to user
+def display_stats(tasks_file,user_file):
+    '''If the user is an admin they can display statistics about number of users
+            and tasks.'''
+    # Create task_overview.txt and user_overview.txt if it doesn't exist (as generate_report function not yet called)
+    if not os.path.exists("task_overview.txt") and not os.path.exists("user_overview.txt"):
+        generate_report(task_list)
+
+    with open(tasks_file, 'r') as t_o_file:
+        task_overview = t_o_file.read().split(";")
+
+    with open(user_file, 'r') as u_o_file:
+        user_overview = u_o_file.read().split(";")
+
+    
+    print("-----------------------------------")
+    print("******TASK OVERVIEW******")
+    print(f"{task_overview[0]}:\t\t\t\t\t\t\t\t\t\t{task_overview[1]}")
+    print(f"{task_overview[2]}:\t\t\t\t\t\t\t\t{task_overview[3]}")
+    print(f"{task_overview[4]}:\t\t\t\t\t\t\t\t{task_overview[5]}")
+    print(f"{task_overview[6]}:\t\t\t\t\t\t\t{task_overview[7]}")
+    print(f"{task_overview[8]}:\t\t\t\t\t{task_overview[9]}")
+    print(f"{task_overview[10]}:\t\t\t\t\t\t{task_overview[11]}")
+    print("\n******USER OVERVIEW******")
+    print(f"{user_overview[0]}:\t\t\t\t\t\t{user_overview[1]}")
+    print(f"{user_overview[2]}:\t\t\t\t\t\t\t{user_overview[3]}")
+    print(f"\n{user_overview[4]}:\t\t\t\t\t\t\t\t\t\t{user_overview[5]}")
+    print(f"{user_overview[6]}:\t\t\t\t\t\t{user_overview[7]}")
+    print(f"{user_overview[8]}:\t\t\t\t\t{user_overview[9]}")
+    print(f"{user_overview[10]}:\t\t\t\t{user_overview[11]}")
+    print(f"{user_overview[12]}:\t\t\t{user_overview[13]}")
+    print(f"{user_overview[14]}:\t{user_overview[15]}")        
+    print("-----------------------------------")
+
 #====Login Section====
 '''This code reads usernames and password from the user.txt file to 
     allow a user to login.
@@ -410,15 +446,7 @@ e - Exit
         generate_report(task_list)
 
     elif menu == 'ds' and curr_user == 'admin': 
-        '''If the user is an admin they can display statistics about number of users
-            and tasks.'''
-        num_users = len(username_password.keys())
-        num_tasks = len(task_list)
-
-        print("-----------------------------------")
-        print(f"Number of users: \t\t {num_users}")
-        print(f"Number of tasks: \t\t {num_tasks}")
-        print("-----------------------------------")    
+        display_stats("task_overview.txt","user_overview.txt")    
 
     elif menu == 'e':
         print('Goodbye!!!')

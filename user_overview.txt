@@ -1,0 +1,1 @@
+total number of users registered;1;total number of tasks assigned;1;user;admin;total number of tasks assigned to user;1;percentage of total tasks assigned to user;100%;percentage of user's tasks that have been completed;0%;percentage of user's tasks that have not been completed;100%;percentage of user's tasks that have not been completed and are overdue;100%
