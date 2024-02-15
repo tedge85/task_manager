@@ -1,9 +1,11 @@
-# Notes: 
+# notes
 # 1. Use the following username and password to access the admin rights 
 # username: admin
 # password: password
 # 2. Ensure you open the whole folder for this task in VS Code otherwise the 
 # program will look in your root directory for the text files.
+
+# ********To-do: deal with wrong entry errors
 
 #=====importing libraries===========
 from calendar import c
@@ -12,9 +14,6 @@ from datetime import datetime, date
 DATETIME_STRING_FORMAT = "%Y-%m-%d"
 from dateutil.parser import parse
 import datetime
-
-# set variable for current date
-current_DT = datetime.datetime.now()
 
 # Create tasks.txt if it doesn't exist
 if not os.path.exists("tasks.txt"):
@@ -25,11 +24,11 @@ with open("tasks.txt", 'r') as task_file:
     task_data = task_file.read().split("\n")
     task_data = [t for t in task_data if t != ""]
 
-# Create task list (list of dictionaries to store tasks for each user)
+current_DT = datetime.datetime.now()
+
 task_list = []
 for t_str in task_data:
     curr_t = {}
-
     # Split by semicolon and manually add each component
     task_components = t_str.split(";")
     curr_t['username'] = task_components[0]
@@ -43,7 +42,7 @@ for t_str in task_data:
 
 #=====functions=====#
 
-# Function registering a new user, asking for username, password, then confirmation of password
+#registering a new user, asking for username, password, then confirmation of password
 def reg_user(new_username, new_password, confirm_password):
     # Check if the new password and confirmed password are the same.
     # - Check if the new password and confirmed password are the same.
@@ -71,7 +70,7 @@ def reg_user(new_username, new_password, confirm_password):
         else:
             return("Passwords do no match")
 
-# Function that adds tasks
+# Adds tasks
 def add_task(task_username, task_title, task_description):
 #'''Allow a user to add a new task to task.txt file
             #Prompt a user for the following: 
@@ -119,7 +118,6 @@ def add_task(task_username, task_title, task_description):
             task_file.write("\n".join(task_list_to_write))
         print("Task successfully added.")
 
-# Function to display tasks assigned to all users
 def view_all(array): 
 # Reads the task from task.txt file and prints to the console in the 
 # format of Output 2 presented in the task pdf (i.e. includes spacing
@@ -133,8 +131,7 @@ def view_all(array):
         disp_str += f"Task Description: {t['description']}\n"
         disp_str += f"Task status: \t {'COMPLETE' if t['completed'] == True else 'INCOMPLETE'}\n"
         print(disp_str)
-
-# Function to display user's assigned tasks
+        
 def view_mine(array):
     '''Reads the task from task.txt file and prints to the console in the 
     format of Output 2 presented in the task pdf (i.e. includes spacing
@@ -162,7 +159,7 @@ def view_mine(array):
         return menu
     # Action if valid task number chosen
     elif array[int(task_num) -1]:
-        curr_task_index = task_num -1
+        curr_task_index = int(task_num -1)
         task_status = input("Type 'complete' or 'edit': ")
     # Action if invalid task number chosen
     else:
@@ -170,7 +167,7 @@ def view_mine(array):
         task_num
 
 
-    # actions if 'complete' chosen
+    # Actions if 'complete' chosen
     if task_status == "complete":
         array[curr_task_index]['completed'] = "Yes"
         print(f"\n \n*****Task status updated*****")
@@ -272,32 +269,29 @@ def view_mine(array):
     completed tasks, uncompleted tasks, tasks overdue, and percentages
     of incomplete and overview tasks, respectively
     '''
-# function to generate text files for user and task information: task_overview.txt & user_overview.txt
 def generate_report(task_data):
-    # Task overview
-    a = 0
-    b = 0
-    c = 0
-    d = 0
-    e = 0
+    total_tasks = 0
+    completed_tasks = 0
+    uncompleted_tasks = 0
+    uncompleted_overdue_tasks = 0
+    
     for t in task_data:
         if t["completed"] == True: 
-            b += 1
+            completed_tasks += 1
         elif parse(str(t['due_date'])) < current_DT:
-            d += 1
-            c += 1
+            uncompleted_overdue_tasks += 1
+            uncompleted_tasks += 1
         else:
-            c += 1
-            e += 1
-        a += 1
+            completed_tasks += 1
+        total_tasks += 1
     
     task_stats = [   
-        'total', a,
-        'completed tasks', b,
-        'uncompleted tasks', c,
-        'uncompleted and overdue tasks', d,
-        'percentage of tasks that are incomplete', f'{round(c / a * 100)}%',
-        'percentage of tasks that are overdue', f'{round(d / a * 100)}%'
+        'total', total_tasks,
+        'completed tasks', completed_tasks,
+        'uncompleted tasks', uncompleted_tasks,
+        'uncompleted and overdue tasks', uncompleted_overdue_tasks,
+        'percentage of tasks that are incomplete', f'{round(uncompleted_tasks / total_tasks * 100)}%',
+        'percentage of tasks that are overdue', f'{round(uncompleted_overdue_tasks / total_tasks * 100)}%'
     ]
 
     # Convert task_stats dictionary to string
@@ -311,18 +305,17 @@ def generate_report(task_data):
             unique_usernames.append(name)
 
     users_registered = len(unique_usernames)
-    task_total = a
 
     user_tasks = [t["title"] for t in task_data if t["username"] == curr_user]
     user_tasks_total = len(user_tasks)
-    user_task_percentage = round(user_tasks_total / a * 100)
+    user_task_percentage = round(user_tasks_total / total_tasks * 100)
     user_completed_tasks_percentage = round(len([d for d in task_data if d["completed"] == True and d["username"] == curr_user]) / user_tasks_total * 100)
     user_uncompleted_tasks_percentage = round(len([d for d in task_data if d["completed"] == False and d["username"] == curr_user]) / user_tasks_total * 100)
     user_incompleted_overdue_tasks_percentage = round(len([d for d in task_data if d["completed"] == False and parse(str(d['due_date'])) < current_DT and d["username"] == curr_user]) / user_tasks_total * 100)
     
     user_stats = [
         "total number of users registered", users_registered,
-        "total number of tasks assigned", task_total,
+        "total number of tasks assigned", total_tasks,
         "user", curr_user,
         "total number of tasks assigned to user", user_tasks_total,
         "percentage of total tasks assigned to user", f"{user_task_percentage}%",
@@ -346,11 +339,10 @@ def generate_report(task_data):
     with open("user_overview.txt", "w+") as u_o_file:
         u_o_file.write(user_stats_str)
 
-# Function that reads task_overview.txt and user_overview.txt and displays contents to user
 def display_stats(tasks_file,user_file):
     '''If the user is an admin they can display statistics about number of users
             and tasks.'''
-    # Create task_overview.txt and user_overview.txt if it doesn't exist (as generate_report function not yet called)
+    # Create tasks.txt if it doesn't exist
     if not os.path.exists("task_overview.txt") and not os.path.exists("user_overview.txt"):
         generate_report(task_list)
 
@@ -378,12 +370,12 @@ def display_stats(tasks_file,user_file):
     print(f"{user_overview[10]}:\t\t\t\t{user_overview[11]}")
     print(f"{user_overview[12]}:\t\t\t{user_overview[13]}")
     print(f"{user_overview[14]}:\t{user_overview[15]}")        
-    print("-----------------------------------")
-
+    print("-----------------------------------")  
+    
 #====Login Section====
-'''This code reads usernames and password from the user.txt file to 
+    '''This code reads usernames and password from the user.txt file to 
     allow a user to login.
-'''
+    '''
 # If no user.txt file, write one with a default account
 if not os.path.exists("user.txt"):
     with open("user.txt", "w") as default_file:
@@ -431,7 +423,7 @@ e - Exit
 : ''').lower()
 
     if menu == 'r':
-       reg_user(input("New Username: "), input("New Password: "), input("Confirm Password: "))
+        reg_user(input("New Username: "), input("New Password: "), input("Confirm Password: "))
 
     elif menu == 'a':
         add_task(input("Name of person assigned to task: "), input("Title of Task: "), input("Description of Task: "))
@@ -440,18 +432,17 @@ e - Exit
         view_all(task_list)
                     
     elif menu == 'vm':
-        view_mine(task_list)      
+        view_mine(task_list)                
     
     elif menu == "gr":
         generate_report(task_list)
 
     elif menu == 'ds' and curr_user == 'admin': 
-        display_stats("task_overview.txt","user_overview.txt")    
+        display_stats("task_overview.txt","user_overview.txt")  
 
     elif menu == 'e':
         print('Goodbye!!!')
         exit()
 
     else:
-        print("You have made a wrong choice, Please Try again")
-
+        print("You have made a wrong choice. Please Try again")
