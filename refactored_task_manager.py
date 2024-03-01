@@ -17,11 +17,10 @@ class Task:
 
     def __init__(self, txt_file):
         self.txt_file = txt_file
-            
-      
+           
         # Create the .txt file if it doesn't exist 
-        if not os.path.exists("tasks.txt"):
-            with open("tasks.txt", "w") as default_file:
+        if not os.path.exists(txt_file):
+            with open(txt_file, "w") as default_file:
                 pass
         
         # Read the date in .txt file then store the 
@@ -45,6 +44,20 @@ class Task:
                 # Save each user's task in an array of dictionaries
                 self.task_list.append(curr_task)
         
+    def write_to_txt_file(self, txt_file):
+        with open(txt_file, "w") as task_file:
+            task_list_to_write = []
+            for t in self.task_list:
+                str_attrs = [
+                    t['username'],
+                    t['title'],
+                    t['description'],
+                    t['due_date'].strftime(DATETIME_STRING_FORMAT),
+                    t['assigned_date'].strftime(DATETIME_STRING_FORMAT),
+                    "Yes" if t['completed'] else "No"
+                ]
+                task_list_to_write.append(";".join(str_attrs))
+            task_file.write("\n".join(task_list_to_write))
 
     def add_task(self, task_username, task_title, task_description):
         '''Allows a user to add a new task to task.txt file'''
@@ -67,7 +80,7 @@ class Task:
                 print("Invalid datetime format. Please use the format specified")
 
         # Then get the current date.
-        curr_date = date.today() ;''' Add the data to the file task.txt and Include 'No' to indicate if the task is complete.'''
+        curr_date = date.today() ;''' Add the data to the file task.txt and indicate whether or not the task is complete.'''
         new_task = {
             "username": task_username,
             "title": task_title,
@@ -78,20 +91,8 @@ class Task:
         }
 
         self.task_list.append(new_task)
-        with open("tasks.txt", "w") as task_file:
-            task_list_to_write = []
-            for t in self.task_list:
-                str_attrs = [
-                    t['username'],
-                    t['title'],
-                    t['description'],
-                    t['due_date'].strftime(DATETIME_STRING_FORMAT),
-                    t['assigned_date'].strftime(DATETIME_STRING_FORMAT),
-                    "Yes" if t['completed'] else "No"
-                ]
-                task_list_to_write.append(";".join(str_attrs))
-            task_file.write("\n".join(task_list_to_write))
-        print("Task successfully added.")
+        
+        self.write_to_txt_file(self.txt_file)
 
     def generate_report(self, task_data):
         total_tasks = 0
@@ -256,19 +257,7 @@ class Task:
             print(disp_str)
         
             # Write result to task.txt file:
-            with open("tasks.txt", "w") as task_file:
-                    task_list_to_write = []
-                    for t in self.task_list:
-                        str_attrs = [
-                            t['username'],
-                            t['title'],
-                            t['description'],
-                            t['due_date'].strftime(DATETIME_STRING_FORMAT),
-                            t['assigned_date'].strftime(DATETIME_STRING_FORMAT),
-                            "Yes" if t['completed'] else "No"
-                        ]
-                        task_list_to_write.append(";".join(str_attrs))
-                    task_file.write("\n".join(task_list_to_write))
+            self.write_to_txt_file(self.txt_file)
 
         # Action if 'edit' chosen
         elif task_status == "edit" and task_data[curr_task_index]['completed'] != 'Yes' :
@@ -286,21 +275,9 @@ class Task:
                 disp_str += f"Task Description: {task_data[curr_task_index]['description']}\n"
                 disp_str += f"Task status: \t {'COMPLETE' if task_data[curr_task_index]['completed'] == 'Yes' else 'INCOMPLETE'}\n"
                 print(disp_str)
- ## REPLACE WITH WRITE CHANGES TO TEXT FILE METHOD           
+           
                 # Write changes to text file
-                with open("tasks.txt", "w") as task_file:
-                    task_list_to_write = []
-                    for t in self.task_list:
-                        str_attrs = [
-                            t['username'],
-                            t['title'],
-                            t['description'],
-                            t['due_date'].strftime(DATETIME_STRING_FORMAT),
-                            t['assigned_date'].strftime(DATETIME_STRING_FORMAT),
-                            "Yes" if t['completed'] else "No"
-                        ]
-                        task_list_to_write.append(";".join(str_attrs))
-                    task_file.write("\n".join(task_list_to_write))
+                self.write_to_txt_file(self.txt_file)                                              
 
             # Action if 'due date' chosen
             elif edit_choice == "due date":
@@ -321,20 +298,8 @@ class Task:
                 disp_str += f"Task status: \t {'COMPLETE' if task_data[curr_task_index]['completed'] == 'Yes' else 'INCOMPLETE'}\n"
                 print(disp_str)
                 
-# REPLACE WITH TASK WRITE METHOD                # Write changes to text file
-                with open("tasks.txt", "w") as task_file:
-                    task_list_to_write = []
-                    for t in self.task_list:
-                        str_attrs = [
-                            t['username'],
-                            t['title'],
-                            t['description'],
-                            t['due_date'].strftime(DATETIME_STRING_FORMAT),
-                            t['assigned_date'].strftime(DATETIME_STRING_FORMAT),
-                            "Yes" if t['completed'] else "No"
-                        ]
-                        task_list_to_write.append(";".join(str_attrs))
-                    task_file.write("\n".join(task_list_to_write))
+                # Write changes to text file
+                write_to_txt_file(self.txt_file)
             
 
                 # Condition if neither value typed
