@@ -4,12 +4,6 @@ from datetime import datetime, date
 DATETIME_STRING_FORMAT = "%Y-%m-%d"
 from dateutil.parser import parse
 import datetime
-
-
-# Turn repeated code into methods - writing to file. Read file as well?
-
-# Separate files & import
-# Ensure documentation
             
 class Task:
     task_list = []
