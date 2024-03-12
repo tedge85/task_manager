@@ -404,7 +404,7 @@ class Menu:
                 task.display_stats("task_overview.txt", "user_overview.txt")
             
             elif menu == "e":
-                quit()
+                exit()
             else:
                 print("Choose a valid option")
                 menu
