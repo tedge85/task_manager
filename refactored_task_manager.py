@@ -39,6 +39,7 @@ class Task:
                 self.task_list.append(curr_task)
         
     def write_to_txt_file(self, txt_file):
+        '''Writes changes made to the tasks in task_list to a .txt file.'''
         with open(txt_file, "w") as task_file:
             task_list_to_write = []
             for t in self.task_list:
@@ -89,6 +90,8 @@ class Task:
         self.write_to_txt_file(self.txt_file)
 
     def generate_report(self, task_data):
+        '''Generates a report, detailing stats about tasks & users, and writes them to
+            task_overview.txt (for task stats) and user_overview.txt (for user stats).'''
         total_tasks = 0
         completed_tasks = 0
         uncompleted_tasks = 0
