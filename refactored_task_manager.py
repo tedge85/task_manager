@@ -417,4 +417,5 @@ user = User("user.txt")
 # Instantiating the task object and creating user.txt file.    
 task = Task("tasks.txt")
 
+# Instantiating the menu object once .txt files have been created and read, ready to edit or display.
 menu = Menu()
